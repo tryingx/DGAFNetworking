@@ -28,14 +28,17 @@ static DGRequestType  sg_requestType  = kDGRequestTypeJSON;
 
 @implementation DGAFNetworkManager
 
+#pragma mark - 指定网络请求接口的基础url
 + (void)updateBaseUrl:(NSString *)baseUrl {
     sg_privateNetworkBaseUrl = baseUrl;
 }
 
+#pragma mark - 对外公开可获取当前所设置的网络接口基础url
 + (NSString *)baseUrl {
     return sg_privateNetworkBaseUrl;
 }
 
+#pragma mark - 开启或关闭接口打印信息
 + (void)enableInterfaceDebug:(BOOL)isDebug {
     sg_isEnableInterfaceDebug = isDebug;
 }
@@ -44,14 +47,17 @@ static DGRequestType  sg_requestType  = kDGRequestTypeJSON;
     return sg_isEnableInterfaceDebug;
 }
 
+#pragma mark - 配置返回格式，默认为JSON。若为XML或者PLIST请在全局修改一下
 + (void)configResponseType:(DGResponseType)responseType {
     sg_responseType = responseType;
 }
 
+#pragma mark - 配置请求格式，默认为JSON。如果要求传XML或者PLIST，请在全局配置一下
 + (void)configRequestType:(DGRequestType)requestType {
     sg_requestType = requestType;
 }
 
+#pragma mark - 开启或关闭是否自动将URL使用UTF8编码，用于处理链接中有中文时无法请求的问题
 + (void)shouldAutoEncodeUrl:(BOOL)shouldAutoEncode {
     sg_shouldAutoEncode = shouldAutoEncode;
 }
@@ -60,16 +66,19 @@ static DGRequestType  sg_requestType  = kDGRequestTypeJSON;
     return sg_shouldAutoEncode;
 }
 
+#pragma mark - 配置公共的请求头，只调用一次即可，通常放在应用启动的时候配置就可以了
 + (void)configCommonHttpHeaders:(NSDictionary *)httpHeaders {
     sg_httpHeaders = httpHeaders;
 }
 
+#pragma mark - GET请求接口，若不指定baseurl，可传完整的url
 + (DGURLSessionTask *)getWithUrl:(NSString *)url
                           success:(DGResponseSuccess)success
                              fail:(DGResponseFail)fail {
     return [self getWithUrl:url params:nil success:success fail:fail];
 }
 
+#pragma mark GET请求接口，若不指定baseurl，可传完整的url
 + (DGURLSessionTask *)getWithUrl:(NSString *)url
                            params:(NSDictionary *)params
                           success:(DGResponseSuccess)success
@@ -90,6 +99,7 @@ static DGRequestType  sg_requestType  = kDGRequestTypeJSON;
                             fail:fail];
 }
 
+#pragma mark - POST请求接口，若不指定baseurl，可传完整的url
 + (DGURLSessionTask *)postWithUrl:(NSString *)url
                             params:(NSDictionary *)params
                            success:(DGResponseSuccess)success
@@ -185,6 +195,7 @@ static DGRequestType  sg_requestType  = kDGRequestTypeJSON;
     return session;
 }
 
+#pragma mark - 上传文件操作
 + (DGURLSessionTask *)uploadFileWithUrl:(NSString *)url
                            uploadingFile:(NSString *)uploadingFile
                                 progress:(DGUploadProgress)progress
@@ -240,6 +251,7 @@ static DGRequestType  sg_requestType  = kDGRequestTypeJSON;
     return session;
 }
 
+#pragma mark - 图片上传接口，若不指定baseurl，可传完整的url
 + (DGURLSessionTask *)uploadWithImage:(UIImage *)image
                                    url:(NSString *)url
                               filename:(NSString *)filename
@@ -304,6 +316,7 @@ static DGRequestType  sg_requestType  = kDGRequestTypeJSON;
     return session;
 }
 
+#pragma mark - 下载文件
 + (DGURLSessionTask *)downloadWithUrl:(NSString *)url
                             saveToPath:(NSString *)saveToPath
                               progress:(DGDownloadProgress)progressBlock
