@@ -18,11 +18,11 @@
  *  @param totalBytesRead               文件总大小
  *  @param totalBytesExpectedToRead     还有多少需要下载
  */
-typedef void (^HYBDownloadProgress)(int64_t bytesRead,
+typedef void (^DGDownloadProgress)(int64_t bytesRead,
                                     int64_t totalBytesRead);
 
-typedef HYBDownloadProgress HYBGetProgress;
-typedef HYBDownloadProgress HYBPostProgress;
+typedef DGDownloadProgress DGGetProgress;
+typedef DGDownloadProgress DGPostProgress;
 
 /*!
  *  @author 黄仪标, 16-01-08 14:01:26
@@ -32,19 +32,19 @@ typedef HYBDownloadProgress HYBPostProgress;
  *  @param bytesWritten              已上传的大小
  *  @param totalBytesWritten         总上传大小
  */
-typedef void (^HYBUploadProgress)(int64_t bytesWritten,
+typedef void (^DGUploadProgress)(int64_t bytesWritten,
                                   int64_t totalBytesWritten);
 
-typedef NS_ENUM(NSUInteger, HYBResponseType) {
-    kHYBResponseTypeJSON = 1, // 默认
-    kHYBResponseTypeXML  = 2, // XML
+typedef NS_ENUM(NSUInteger, DGResponseType) {
+    kDGResponseTypeJSON = 1, // 默认
+    kDGResponseTypeXML  = 2, // XML
     // 特殊情况下，一转换服务器就无法识别的，默认会尝试转换成JSON，若失败则需要自己去转换
-    kHYBResponseTypeData = 3
+    kDGResponseTypeData = 3
 };
 
-typedef NS_ENUM(NSUInteger, HYBRequestType) {
-    kHYBRequestTypeJSON = 1,        // 默认
-    kHYBRequestTypePlainText  = 2   // 普通text/html
+typedef NS_ENUM(NSUInteger, DGRequestType) {
+    kDGRequestTypeJSON = 1,        // 默认
+    kDGRequestTypePlainText  = 2   // 普通text/html
 };
 
 @class NSURLSessionTask;
@@ -52,7 +52,7 @@ typedef NS_ENUM(NSUInteger, HYBRequestType) {
 // 请勿直接使用NSURLSessionDataTask,以减少对第三方的依赖
 // 所有接口返回的类型都是基类NSURLSessionTask，若要接收返回值
 // 且处理，请转换成对应的子类类型
-typedef NSURLSessionTask HYBURLSessionTask;
+typedef NSURLSessionTask DGURLSessionTask;
 
 /*!
  *  @author 黄仪标, 15-11-15 13:11:27
@@ -61,7 +61,7 @@ typedef NSURLSessionTask HYBURLSessionTask;
  *
  *  @param response 服务端返回的数据类型，通常是字典
  */
-typedef void(^HYBResponseSuccess)(id response);
+typedef void(^DGResponseSuccess)(id response);
 
 /*!
  *  @author 黄仪标, 15-11-15 13:11:59
@@ -70,7 +70,7 @@ typedef void(^HYBResponseSuccess)(id response);
  *
  *  @param error 错误信息
  */
-typedef void(^HYBResponseFail)(NSError *error);
+typedef void(^DGResponseFail)(NSError *error);
 
 /*!
  *  @author huangyibiao, 15-11-15 13:11:31
@@ -85,7 +85,7 @@ typedef void(^HYBResponseFail)(NSError *error);
  *  @author 黄仪标, 15-11-15 13:11:45
  *
  *  用于指定网络请求接口的基础url，如：
- *  http://henishuo.com或者http://101.200.209.244
+ *  http://tryingx.com或者http://192.168.0.1
  *  通常在AppDelegate中启动时就设置一次就可以了。如果接口有来源
  *  于多个服务器，可以调用更新
  *
@@ -118,7 +118,7 @@ typedef void(^HYBResponseFail)(NSError *error);
  *
  *  @param responseType 响应格式
  */
-+ (void)configResponseType:(HYBResponseType)responseType;
++ (void)configResponseType:(DGResponseType)responseType;
 
 /*!
  *  @author 黄仪标, 15-12-25 15:12:45
@@ -127,7 +127,7 @@ typedef void(^HYBResponseFail)(NSError *error);
  *
  *  @param requestType 请求格式
  */
-+ (void)configRequestType:(HYBRequestType)requestType;
++ (void)configRequestType:(DGRequestType)requestType;
 
 /*!
  *  @author 黄仪标, 15-11-15 15:11:16
@@ -158,9 +158,9 @@ typedef void(^HYBResponseFail)(NSError *error);
  *
  *  @return 返回的对象中有可取消请求的API
  */
-+ (HYBURLSessionTask *)getWithUrl:(NSString *)url
-                          success:(HYBResponseSuccess)success
-                             fail:(HYBResponseFail)fail;
++ (DGURLSessionTask *)getWithUrl:(NSString *)url
+                          success:(DGResponseSuccess)success
+                             fail:(DGResponseFail)fail;
 /*!
  *  @author 黄仪标, 15-11-15 13:11:50
  *
@@ -173,16 +173,16 @@ typedef void(^HYBResponseFail)(NSError *error);
  *
  *  @return 返回的对象中有可取消请求的API
  */
-+ (HYBURLSessionTask *)getWithUrl:(NSString *)url
++ (DGURLSessionTask *)getWithUrl:(NSString *)url
                            params:(NSDictionary *)params
-                          success:(HYBResponseSuccess)success
-                             fail:(HYBResponseFail)fail;
+                          success:(DGResponseSuccess)success
+                             fail:(DGResponseFail)fail;
 
-+ (HYBURLSessionTask *)getWithUrl:(NSString *)url
++ (DGURLSessionTask *)getWithUrl:(NSString *)url
                            params:(NSDictionary *)params
-                         progress:(HYBGetProgress)progress
-                          success:(HYBResponseSuccess)success
-                             fail:(HYBResponseFail)fail;
+                         progress:(DGGetProgress)progress
+                          success:(DGResponseSuccess)success
+                             fail:(DGResponseFail)fail;
 
 /*!
  *  @author 黄仪标, 15-11-15 13:11:50
@@ -196,16 +196,16 @@ typedef void(^HYBResponseFail)(NSError *error);
  *
  *  @return 返回的对象中有可取消请求的API
  */
-+ (HYBURLSessionTask *)postWithUrl:(NSString *)url
++ (DGURLSessionTask *)postWithUrl:(NSString *)url
                             params:(NSDictionary *)params
-                           success:(HYBResponseSuccess)success
-                              fail:(HYBResponseFail)fail;
+                           success:(DGResponseSuccess)success
+                              fail:(DGResponseFail)fail;
 
-+ (HYBURLSessionTask *)postWithUrl:(NSString *)url
++ (DGURLSessionTask *)postWithUrl:(NSString *)url
                             params:(NSDictionary *)params
-                          progress:(HYBPostProgress)progress
-                           success:(HYBResponseSuccess)success
-                              fail:(HYBResponseFail)fail;
+                          progress:(DGPostProgress)progress
+                           success:(DGResponseSuccess)success
+                              fail:(DGResponseFail)fail;
 /**
  *	@author 黄仪标, 16-01-31 00:01:40
  *
@@ -223,15 +223,15 @@ typedef void(^HYBResponseFail)(NSError *error);
  *
  *	@return
  */
-+ (HYBURLSessionTask *)uploadWithImage:(UIImage *)image
++ (DGURLSessionTask *)uploadWithImage:(UIImage *)image
                                    url:(NSString *)url
                               filename:(NSString *)filename
                                   name:(NSString *)name
                               mimeType:(NSString *)mimeType
                             parameters:(NSDictionary *)parameters
-                              progress:(HYBUploadProgress)progress
-                               success:(HYBResponseSuccess)success
-                                  fail:(HYBResponseFail)fail;
+                              progress:(DGUploadProgress)progress
+                               success:(DGResponseSuccess)success
+                                  fail:(DGResponseFail)fail;
 
 /**
  *	@author 黄仪标, 16-01-31 00:01:59
@@ -246,11 +246,11 @@ typedef void(^HYBResponseFail)(NSError *error);
  *
  *	@return
  */
-+ (HYBURLSessionTask *)uploadFileWithUrl:(NSString *)url
++ (DGURLSessionTask *)uploadFileWithUrl:(NSString *)url
                            uploadingFile:(NSString *)uploadingFile
-                                progress:(HYBUploadProgress)progress
-                                 success:(HYBResponseSuccess)success
-                                    fail:(HYBResponseFail)fail;
+                                progress:(DGUploadProgress)progress
+                                 success:(DGResponseSuccess)success
+                                    fail:(DGResponseFail)fail;
 
 
 /*!
@@ -264,10 +264,10 @@ typedef void(^HYBResponseFail)(NSError *error);
  *  @param success       下载成功后的回调
  *  @param failure       下载失败后的回调
  */
-+ (HYBURLSessionTask *)downloadWithUrl:(NSString *)url
++ (DGURLSessionTask *)downloadWithUrl:(NSString *)url
                             saveToPath:(NSString *)saveToPath
-                              progress:(HYBDownloadProgress)progressBlock
-                               success:(HYBResponseSuccess)success
-                               failure:(HYBResponseFail)failure;
+                              progress:(DGDownloadProgress)progressBlock
+                               success:(DGResponseSuccess)success
+                               failure:(DGResponseFail)failure;
 
 @end
