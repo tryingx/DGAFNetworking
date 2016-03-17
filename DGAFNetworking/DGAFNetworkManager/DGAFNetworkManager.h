@@ -47,6 +47,7 @@ typedef NS_ENUM(NSUInteger, DGRequestType) {
 // 请勿直接使用NSURLSessionDataTask,以减少对第三方的依赖
 // 所有接口返回的类型都是基类NSURLSessionTask，若要接收返回值
 // 且处理，请转换成对应的子类类型
+
 typedef NSURLSessionTask DGURLSessionTask;
 
 /**
