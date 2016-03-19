@@ -9,37 +9,17 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-/**
- *  下载进度
- *
- *  @param bytesRead      已下载的大小
- *  @param totalBytesRead 文件总大小
- */
-typedef void (^DGDownloadProgress)(int64_t bytesRead,
-                                    int64_t totalBytesRead);
-
-typedef DGDownloadProgress DGGetProgress;
-typedef DGDownloadProgress DGPostProgress;
-
-/**
- *  上传进度
- *
- *  @param bytesWritten      已上传的大小
- *  @param totalBytesWritten 总上传大小
- */
-typedef void (^DGUploadProgress)(int64_t bytesWritten,
-                                  int64_t totalBytesWritten);
 
 typedef NS_ENUM(NSUInteger, DGResponseType) {
-    kDGResponseTypeJSON = 1,        // 默认
-    kDGResponseTypeXML  = 2,        // XML
+    kResponseTypeJSON = 1,        // 默认
+    kResponseTypeXML  = 2,        // XML
     // 特殊情况下，一转换服务器就无法识别的，默认会尝试转换成JSON，若失败则需要自己去转换
-    kDGResponseTypeData = 3
+    kResponseTypeData = 3
 };
 
 typedef NS_ENUM(NSUInteger, DGRequestType) {
-    kDGRequestTypeJSON = 1,        // 默认
-    kDGRequestTypePlainText  = 2   // 普通text/html
+    kRequestTypeJSON = 1,        // 默认
+    kRequestTypePlainText  = 2   // 普通text/html
 };
 
 @class NSURLSessionTask;
@@ -50,19 +30,11 @@ typedef NS_ENUM(NSUInteger, DGRequestType) {
 
 typedef NSURLSessionTask DGURLSessionTask;
 
-/**
- *  请求成功的回调Block
- *
- *  @param response 服务端返回的数据类型，通常是字典
- */
-typedef void(^DGResponseSuccess)(id response);
 
-/**
- *  网络响应失败时的回调Block
- *
- *  @param error 错误信息
- */
-typedef void(^DGResponseFail)(NSError *error);
+typedef void (^RequestProgress)(int64_t bytes, int64_t totalBytes);
+
+typedef void(^ResponseSuccess)(id response);
+typedef void(^ResponseFail)(NSError *error);
 
 /**
  *  基于AFNetworking的网络层封装类.
@@ -70,6 +42,13 @@ typedef void(^DGResponseFail)(NSError *error);
  *  @note 这里只提供公共api
  */
 @interface DGAFNetworkManager : NSObject
+{
+@public
+    RequestProgress block_requestProgress;
+    
+    ResponseSuccess block_requestSuccessful;
+    ResponseFail    block_requestError;
+}
 
 /**
  *  用于指定网络请求接口的基础url，如：
@@ -133,8 +112,8 @@ typedef void(^DGResponseFail)(NSError *error);
  *  @return 返回的对象中有可取消请求的API
  */
 + (DGURLSessionTask *)getWithUrl:(NSString *)url
-                          success:(DGResponseSuccess)success
-                             fail:(DGResponseFail)fail;
+                          success:(ResponseSuccess)success
+                             fail:(ResponseFail)fail;
 /**
  *  GET请求接口，若不指定baseurl，可传完整的url
  *
@@ -147,14 +126,14 @@ typedef void(^DGResponseFail)(NSError *error);
  */
 + (DGURLSessionTask *)getWithUrl:(NSString *)url
                            params:(NSDictionary *)params
-                          success:(DGResponseSuccess)success
-                             fail:(DGResponseFail)fail;
+                          success:(ResponseSuccess)success
+                             fail:(ResponseFail)fail;
 
 + (DGURLSessionTask *)getWithUrl:(NSString *)url
                            params:(NSDictionary *)params
-                         progress:(DGGetProgress)progress
-                          success:(DGResponseSuccess)success
-                             fail:(DGResponseFail)fail;
+                         progress:(RequestProgress)progress
+                          success:(ResponseSuccess)success
+                             fail:(ResponseFail)fail;
 
 /**
  *  POST请求接口，若不指定baseurl，可传完整的url
@@ -168,14 +147,14 @@ typedef void(^DGResponseFail)(NSError *error);
  */
 + (DGURLSessionTask *)postWithUrl:(NSString *)url
                             params:(NSDictionary *)params
-                           success:(DGResponseSuccess)success
-                              fail:(DGResponseFail)fail;
+                           success:(ResponseSuccess)success
+                              fail:(ResponseFail)fail;
 
 + (DGURLSessionTask *)postWithUrl:(NSString *)url
                             params:(NSDictionary *)params
-                          progress:(DGPostProgress)progress
-                           success:(DGResponseSuccess)success
-                              fail:(DGResponseFail)fail;
+                          progress:(RequestProgress)progress
+                           success:(ResponseSuccess)success
+                              fail:(ResponseFail)fail;
 /**
  *	图片上传接口，若不指定baseurl，可传完整的url
  *
@@ -197,9 +176,9 @@ typedef void(^DGResponseFail)(NSError *error);
                                   name:(NSString *)name
                               mimeType:(NSString *)mimeType
                             parameters:(NSDictionary *)parameters
-                              progress:(DGUploadProgress)progress
-                               success:(DGResponseSuccess)success
-                                  fail:(DGResponseFail)fail;
+                              progress:(RequestProgress)progress
+                               success:(ResponseSuccess)success
+                                  fail:(ResponseFail)fail;
 
 /**
  *	上传文件操作
@@ -214,9 +193,9 @@ typedef void(^DGResponseFail)(NSError *error);
  */
 + (DGURLSessionTask *)uploadFileWithUrl:(NSString *)url
                            uploadingFile:(NSString *)uploadingFile
-                                progress:(DGUploadProgress)progress
-                                 success:(DGResponseSuccess)success
-                                    fail:(DGResponseFail)fail;
+                                progress:(RequestProgress)progress
+                                 success:(ResponseSuccess)success
+                                    fail:(ResponseFail)fail;
 
 
 /**
@@ -230,8 +209,8 @@ typedef void(^DGResponseFail)(NSError *error);
  */
 + (DGURLSessionTask *)downloadWithUrl:(NSString *)url
                             saveToPath:(NSString *)saveToPath
-                              progress:(DGDownloadProgress)progressBlock
-                               success:(DGResponseSuccess)success
-                               failure:(DGResponseFail)failure;
+                              progress:(RequestProgress)progressBlock
+                               success:(ResponseSuccess)success
+                               failure:(ResponseFail)failure;
 
 @end

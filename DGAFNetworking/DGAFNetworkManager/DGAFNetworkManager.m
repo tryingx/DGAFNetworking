@@ -23,8 +23,8 @@ static NSString *sg_privateNetworkBaseUrl = nil;
 static BOOL sg_isEnableInterfaceDebug = NO;
 static BOOL sg_shouldAutoEncode = NO;
 static NSDictionary *sg_httpHeaders = nil;
-static DGResponseType sg_responseType = kDGResponseTypeJSON;
-static DGRequestType  sg_requestType  = kDGRequestTypeJSON;
+static DGResponseType sg_responseType = kResponseTypeJSON;
+static DGRequestType  sg_requestType  = kRequestTypeJSON;
 
 @implementation DGAFNetworkManager
 
@@ -73,24 +73,24 @@ static DGRequestType  sg_requestType  = kDGRequestTypeJSON;
 
 #pragma mark - GET请求接口，若不指定baseurl，可传完整的url
 + (DGURLSessionTask *)getWithUrl:(NSString *)url
-                          success:(DGResponseSuccess)success
-                             fail:(DGResponseFail)fail {
+                          success:(ResponseSuccess)success
+                             fail:(ResponseFail)fail {
     return [self getWithUrl:url params:nil success:success fail:fail];
 }
 
 #pragma mark GET请求接口，若不指定baseurl，可传完整的url
 + (DGURLSessionTask *)getWithUrl:(NSString *)url
                            params:(NSDictionary *)params
-                          success:(DGResponseSuccess)success
-                             fail:(DGResponseFail)fail {
+                          success:(ResponseSuccess)success
+                             fail:(ResponseFail)fail {
     return [self getWithUrl:url params:params progress:nil success:success fail:fail];
 }
 
 + (DGURLSessionTask *)getWithUrl:(NSString *)url
                            params:(NSDictionary *)params
-                         progress:(DGGetProgress)progress
-                          success:(DGResponseSuccess)success
-                             fail:(DGResponseFail)fail {
+                         progress:(RequestProgress)progress
+                          success:(ResponseSuccess)success
+                             fail:(ResponseFail)fail {
     return [self _requestWithUrl:url
                        httpMedth:1
                           params:params
@@ -102,16 +102,16 @@ static DGRequestType  sg_requestType  = kDGRequestTypeJSON;
 #pragma mark - POST请求接口，若不指定baseurl，可传完整的url
 + (DGURLSessionTask *)postWithUrl:(NSString *)url
                             params:(NSDictionary *)params
-                           success:(DGResponseSuccess)success
-                              fail:(DGResponseFail)fail {
+                           success:(ResponseSuccess)success
+                              fail:(ResponseFail)fail {
     return [self postWithUrl:url params:params progress:nil success:success fail:fail];
 }
 
 + (DGURLSessionTask *)postWithUrl:(NSString *)url
                             params:(NSDictionary *)params
-                          progress:(DGPostProgress)progress
-                           success:(DGResponseSuccess)success
-                              fail:(DGResponseFail)fail {
+                          progress:(RequestProgress)progress
+                           success:(ResponseSuccess)success
+                              fail:(ResponseFail)fail {
     return [self _requestWithUrl:url
                        httpMedth:2
                           params:params
@@ -123,9 +123,9 @@ static DGRequestType  sg_requestType  = kDGRequestTypeJSON;
 + (DGURLSessionTask *)_requestWithUrl:(NSString *)url
                              httpMedth:(NSUInteger)httpMethod
                                 params:(NSDictionary *)params
-                              progress:(DGDownloadProgress)progress
-                               success:(DGResponseSuccess)success
-                                  fail:(DGResponseFail)fail {
+                              progress:(RequestProgress)progress
+                               success:(ResponseSuccess)success
+                                  fail:(ResponseFail)fail {
     AFHTTPSessionManager *manager = [self manager];
     
     if ([self baseUrl] == nil) {
@@ -198,9 +198,9 @@ static DGRequestType  sg_requestType  = kDGRequestTypeJSON;
 #pragma mark - 上传文件操作
 + (DGURLSessionTask *)uploadFileWithUrl:(NSString *)url
                            uploadingFile:(NSString *)uploadingFile
-                                progress:(DGUploadProgress)progress
-                                 success:(DGResponseSuccess)success
-                                    fail:(DGResponseFail)fail {
+                                progress:(RequestProgress)progress
+                                 success:(ResponseSuccess)success
+                                    fail:(ResponseFail)fail {
     if ([NSURL URLWithString:uploadingFile] == nil) {
         DGAppLog(@"uploadingFile无效，无法生成URL。请检查待上传文件是否存在");
         return nil;
@@ -258,9 +258,9 @@ static DGRequestType  sg_requestType  = kDGRequestTypeJSON;
                                   name:(NSString *)name
                               mimeType:(NSString *)mimeType
                             parameters:(NSDictionary *)parameters
-                              progress:(DGUploadProgress)progress
-                               success:(DGResponseSuccess)success
-                                  fail:(DGResponseFail)fail {
+                              progress:(RequestProgress)progress
+                               success:(ResponseSuccess)success
+                                  fail:(ResponseFail)fail {
     if ([self baseUrl] == nil) {
         if ([NSURL URLWithString:url] == nil) {
             DGAppLog(@"URLString无效，无法生成URL。可能是URL中有中文，请尝试Encode URL");
@@ -319,9 +319,10 @@ static DGRequestType  sg_requestType  = kDGRequestTypeJSON;
 #pragma mark - 下载文件
 + (DGURLSessionTask *)downloadWithUrl:(NSString *)url
                             saveToPath:(NSString *)saveToPath
-                              progress:(DGDownloadProgress)progressBlock
-                               success:(DGResponseSuccess)success
-                               failure:(DGResponseFail)failure {
+                               params:(NSDictionary *)paramsDict
+                              progress:(RequestProgress)progressBlock
+                               success:(ResponseSuccess)success
+                               failure:(ResponseFail)failure {
     if ([self baseUrl] == nil) {
         if ([NSURL URLWithString:url] == nil) {
             DGAppLog(@"URLString无效，无法生成URL。可能是URL中有中文，请尝试Encode URL");
@@ -334,8 +335,9 @@ static DGRequestType  sg_requestType  = kDGRequestTypeJSON;
         }
     }
     
-    NSURLRequest *downloadRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:url]];
     AFHTTPSessionManager *manager = [self manager];
+    
+    NSMutableURLRequest *downloadRequest = [manager.requestSerializer requestWithMethod:@"POST" URLString:url parameters:paramsDict error:nil];
     
     DGURLSessionTask *session = [manager downloadTaskWithRequest:downloadRequest progress:^(NSProgress * _Nonnull downloadProgress) {
         if (progressBlock) {
@@ -365,13 +367,13 @@ static DGRequestType  sg_requestType  = kDGRequestTypeJSON;
     }
     
     switch (sg_requestType) {
-        case kDGRequestTypeJSON: {
+        case kRequestTypeJSON: {
             manager.requestSerializer = [AFJSONRequestSerializer serializer];
             [manager.requestSerializer setValue:@"application/json" forHTTPHeaderField:@"Accept"];
             [manager.requestSerializer setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
             break;
         }
-        case kDGRequestTypePlainText: {
+        case kRequestTypePlainText: {
             manager.requestSerializer = [AFHTTPRequestSerializer serializer];
             break;
         }
@@ -381,15 +383,15 @@ static DGRequestType  sg_requestType  = kDGRequestTypeJSON;
     }
     
     switch (sg_responseType) {
-        case kDGResponseTypeJSON: {
+        case kResponseTypeJSON: {
             manager.responseSerializer = [AFJSONResponseSerializer serializer];
             break;
         }
-        case kDGResponseTypeXML: {
+        case kResponseTypeXML: {
             manager.responseSerializer = [AFXMLParserResponseSerializer serializer];
             break;
         }
-        case kDGResponseTypeData: {
+        case kResponseTypeData: {
             manager.responseSerializer = [AFHTTPResponseSerializer serializer];
             break;
         }
@@ -503,7 +505,7 @@ static DGRequestType  sg_requestType  = kDGRequestTypeJSON;
     }
 }
 
-+ (void)successResponse:(id)responseData callback:(DGResponseSuccess)success {
++ (void)successResponse:(id)responseData callback:(ResponseSuccess)success {
     if (success) {
         success([self tryToParseData:responseData]);
     }
